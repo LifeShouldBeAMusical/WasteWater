@@ -1,4 +1,4 @@
-import requests, pandas, numpy
+import requests, pandas, numpy, datetime
 
 def get_data(parameters: dict[str, str]) -> pandas.DataFrame:
 	result = requests.get("https://data.cdc.gov/resource/2ew6-ywp6.json", params=parameters)
@@ -13,7 +13,9 @@ def clean_data(data: pandas.DataFrame) -> pandas.DataFrame:
 	return data
 
 def get_most_recent_data(data: pandas.DataFrame) -> pandas.DataFrame:
-	most_recent = data[['wwtp_id', 'date_end']] \
+	acceptable_cutoff = datetime.date.today() - datetime.timedelta(weeks=2)
+	recent_idx = (data['date_end'] > str(acceptable_cutoff))
+	most_recent = data.loc[recent_idx, ['wwtp_id', 'date_end']] \
 		.groupby('wwtp_id', as_index=False).max()
 	most_recent_data = data.join(
 		most_recent.set_index(['wwtp_id', 'date_end']),

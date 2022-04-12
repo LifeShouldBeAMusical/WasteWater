@@ -9,7 +9,6 @@ def main(argv: list[str]):
 	parameters = {}
 	if p:
 		parameters[p] = v
-	# print(parameters)
 	
 	data = get_data(parameters)
 	
@@ -56,5 +55,4 @@ def get_parsed_arguments(argv: list[str]) -> (str, str):
 
 
 if __name__ == "__main__":
-	print(sys.argv)
 	main(sys.argv[1:])
