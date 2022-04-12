@@ -1,9 +1,10 @@
 import requests, pandas, datetime, sys, getopt
+from ww_statistic import weighted_average
+from ww_data import get_data, get_most_recent_data
 
 
 def main(argv: list[str]):
 	(p, v) = get_parsed_arguments(argv)
-	
 	
 	parameters = {}
 	if p:
@@ -50,29 +51,6 @@ def get_parsed_arguments(argv: list[str]) -> (str, str):
 			print("Jurisdiction: %s" % param_value)
 	
 	return (param, param_value)
-
-	
-def get_data(parameters: dict[str, str]) -> pandas.DataFrame:
-	result = requests.get("https://data.cdc.gov/resource/2ew6-ywp6.json", params=parameters)
-	
-	assert result.status_code == 200
-	
-	data = pandas.DataFrame(result.json())
-	return data
-
-def get_most_recent_data(data: pandas.DataFrame) -> pandas.DataFrame:
-	most_recent = data[['wwtp_id', 'date_end']] \
-		.groupby('wwtp_id', as_index=False).max()
-	most_recent_data = data.join(
-		most_recent.set_index(['wwtp_id', 'date_end']),
-		on=['wwtp_id', 'date_end'],
-		how='inner')
-	return most_recent_data
-
-
-
-def weighted_average(df: pandas.DataFrame, values: str, weights: str) -> float:
-    return sum(df[weights].astype(float) * df[values].astype(float)) / df[weights].astype(float).sum()
 
 
 if __name__ == "__main__":
